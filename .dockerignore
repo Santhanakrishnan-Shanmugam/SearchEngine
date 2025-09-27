@@ -1,0 +1,23 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environment folders
+venv/
+.env
+
+# Ignore node modules from React frontend
+mysearchengine/node_modules/
+mysearchengine/build/
+
+# Ignore git files
+.git/
+.gitignore
+
+# Ignore Jupyter notebooks
+*.ipynb
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
