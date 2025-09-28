@@ -5,8 +5,10 @@ from chain import RAG
 app = FastAPI()
 
 
-origins = [   
+origins = [
     "http://neurasearch.s3-website.ap-south-1.amazonaws.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
 ]
 
 app.add_middleware(
@@ -19,9 +21,12 @@ app.add_middleware(
 
 @app.post("/")
 def query_endpoint(inputs: dict = Body(...)):
+   
     try:
+       
+        print("Received:", inputs)
         result = RAG(inputs)
-        return result  # already JSON-serializable
+        return result
     except Exception as e:
         return {"documents": [], "all_documents": [], "llm_answer": str(e)}
 
