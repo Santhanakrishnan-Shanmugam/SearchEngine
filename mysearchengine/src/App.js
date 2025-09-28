@@ -12,7 +12,7 @@ function App() {
 
   const handleSearch = async (query) => {
     try {
-      const response = await fetch("http://127.0.0.1:8080/", {
+      const response = await fetch("http://3.110.124.2:8000/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query }),

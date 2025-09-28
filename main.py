@@ -4,8 +4,11 @@ from chain import RAG
 
 app = FastAPI()
 
-# Allow your React app
-origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+
+origins = [
+    "http://3.110.124.2",   
+    "http://localhost:3000", 
+]
 
 app.add_middleware(
     CORSMiddleware,
