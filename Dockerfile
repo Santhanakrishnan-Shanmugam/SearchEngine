@@ -1,21 +1,20 @@
-# Use Python base image
-FROM python:3.11
+# Use a minimal Python image
+FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Copy only requirements first (better caching)
-COPY requirements.txt .
+# Copy only your app files
+COPY main.py chain.py requirements.txt ./
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy your local pip cache (adjust the path if needed)
+COPY "C:/Users/Krish/AppData/Local/pip/Cache" /root/.cache/pip
 
-# Copy project files
-COPY main.py chain.py ./
-COPY .env ./
+# Install requirements using only cached packages
+RUN pip install --no-index --find-links=/root/.cache/pip -r requirements.txt
 
-# Expose backend port
+# Expose the port your FastAPI app will run on
 EXPOSE 8080
 
-# Start FastAPI app
+# Run FastAPI app with Uvicorn
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
