@@ -5,9 +5,7 @@ from chain import RAG
 app = FastAPI()
 
 
-origins = [
-    "http://3.110.124.2:8080",
-    "http://localhost:3000",     
+origins = [   
     "http://neurasearch.s3-website.ap-south-1.amazonaws.com",
 ]
 
