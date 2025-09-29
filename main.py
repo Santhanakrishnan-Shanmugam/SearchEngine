@@ -4,7 +4,7 @@ from chain import RAG
 
 app = FastAPI()
 origins = [
-    "https://neurasearch.s3-website.ap-south-1.amazonaws.com",
+    "http://neurasearch.s3-website.ap-south-1.amazonaws.com",
 ]
 
 app.add_middleware(
