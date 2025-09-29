@@ -3,8 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from chain import RAG
 
 app = FastAPI()
+origins = [
+    "https://neurasearch.s3-website.ap-south-1.amazonaws.com",
+]
 
-# Allow all origins for now
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],   
