@@ -1,12 +1,13 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from chain import RAG
-
+import uvicorn
 app = FastAPI()
 
 # Allow only your React app origin
 origins = [
-    "http://neurasearch.s3-website.ap-south-1.amazonaws.com"
+    "http://neurasearch.s3-website.ap-south-1.amazonaws.com",
+    "http://localhost:3000"
 ]
 
 app.add_middleware(
@@ -17,7 +18,7 @@ app.add_middleware(
     allow_headers=["*"]       # Content-Type, Authorization
 )
 
-@app.post("/api/")
+@app.post("/")
 async def query_endpoint(request: Request):
     data = await request.json()
     if "query" not in data:
@@ -26,5 +27,4 @@ async def query_endpoint(request: Request):
     return result
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+   uvicorn.run(app, host="127.0.0.1", port=8000)

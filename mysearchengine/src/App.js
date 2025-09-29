@@ -4,15 +4,15 @@ import Results from "./components/Results";
 import Logo from "./components/Logo";
 
 function App() {
-  const [topResults, setTopResults] = useState([]);    // top 3
-  const [allResults, setAllResults] = useState([]);    // all 10
+  const [topResults, setTopResults] = useState([]);    
+  const [allResults, setAllResults] = useState([]);    
   const [llmAnswer, setLlmAnswer] = useState("");
   const [query, setQuery] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
 
   const handleSearch = async (query) => {
     try {
-      const response = await fetch("/api/", {   // note: just /api/
+      const response = await fetch("http://3.110.124.2/", {   
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query }),
