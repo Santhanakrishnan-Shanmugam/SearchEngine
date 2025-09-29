@@ -7,9 +7,11 @@ app = FastAPI()
 
 origins = [
     "http://neurasearch.s3-website.ap-south-1.amazonaws.com",
+    "https://neurasearch.s3-website.ap-south-1.amazonaws.com",  
     "http://localhost:3000",
     "http://127.0.0.1:3000"
 ]
+
 
 app.add_middleware(
     CORSMiddleware,
