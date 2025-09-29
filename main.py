@@ -5,10 +5,9 @@ from chain import RAG
 
 app = FastAPI()
 
-
 origins = [
-    "http://neurasearch.s3-website.ap-south-1.amazonaws.com",
-    "http://localhost:3000"
+    "https://your-frontend.vercel.app",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -19,17 +18,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 class QueryRequest(BaseModel):
     query: str
 
-
-@app.post("/")
+@app.post("/search")
 async def search(request: QueryRequest):
     result = RAG({"query": request.query})
     return result
 
-
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
