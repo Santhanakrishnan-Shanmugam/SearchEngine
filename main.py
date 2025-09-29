@@ -4,23 +4,17 @@ from chain import RAG
 
 app = FastAPI()
 
-
 origins = [
-    "http://neurasearch.s3-website.ap-south-1.amazonaws.com",
+    "http://neurasearch.s3-website.ap-south-1.amazonaws.com",  # HTTP version
 ]
-
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,       
-    allow_credentials=True,      
-    allow_methods=["*"],         
-    allow_headers=["*"],         
+    allow_origins=origins,       # exact origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-
-@app.options("/")
-async def options_root():
-    return {}
 
 @app.post("/")
 async def query_endpoint(request: Request):
@@ -35,4 +29,4 @@ async def query_endpoint(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8080)
