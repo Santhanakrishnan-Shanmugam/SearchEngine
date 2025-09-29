@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
 from chain import RAG
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -21,13 +22,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+
+class QueryRequest(BaseModel):
+    query: str
+
 @app.post("/")
-def query_endpoint(inputs: dict = Body(...)):
-   
+def query_endpoint(request: QueryRequest):
     try:
-       
-        print("Received:", inputs)
-        result = RAG(inputs)
+        print("Received query:", request.query)
+        result = RAG({"query": request.query})  # wrap into dict for your RAG
         return result
     except Exception as e:
         return {"documents": [], "all_documents": [], "llm_answer": str(e)}
