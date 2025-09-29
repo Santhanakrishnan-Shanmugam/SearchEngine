@@ -8,11 +8,11 @@ function App() {
   const [allResults, setAllResults] = useState([]);    // all 10
   const [llmAnswer, setLlmAnswer] = useState("");
   const [query, setQuery] = useState("");
-  const [hasSearched, setHasSearched] = useState(false); // track if search happened
+  const [hasSearched, setHasSearched] = useState(false);
 
   const handleSearch = async (query) => {
     try {
-      const response = await fetch("http://3.110.124.2:8080/", {
+      const response = await fetch("/api/", {   // note: just /api/
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query }),
@@ -21,11 +21,11 @@ function App() {
       const data = await response.json();
       console.log("Backend response:", data);
 
-      setQuery(data.query || query);
-      setTopResults(data.documents || []);          // top 3
-      setAllResults(data.all_documents || []);     // all 10
+      setQuery(query);
+      setTopResults(data.documents || []);
+      setAllResults(data.all_documents || []);
       setLlmAnswer(data.llm_answer || "");
-      setHasSearched(true);                         // mark search done
+      setHasSearched(true);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -34,8 +34,9 @@ function App() {
   return (
     <div>
       <div className="app-container">
-       <Logo />
+        <Logo />
       </div>
+
       <SearchBar onSearch={handleSearch} />
 
       {query && (
@@ -48,13 +49,9 @@ function App() {
         <div className="mt-4 text-center text-lg italic">{llmAnswer}</div>
       )}
 
-      {/* Only show results after a search */}
       {hasSearched && (
         <>
-          {/* Top 3 Results */}
           <Results results={topResults} title="Top 3 Results" />
-
-          {/* All 10 Results */}
           <Results results={allResults} title="All Results" />
         </>
       )}

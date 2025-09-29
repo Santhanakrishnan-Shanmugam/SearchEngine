@@ -16,7 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/")
+@app.post("/api/")
 async def query_endpoint(request: Request):
     try:
         data = await request.json()
