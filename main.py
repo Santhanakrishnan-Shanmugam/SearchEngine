@@ -1,21 +1,10 @@
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from chain import RAG
-from pydantic import BaseModel
 
 app = FastAPI()
 
-
-origins = [
-    "http://neurasearch.s3-website.ap-south-1.amazonaws.com",
-    "https://neurasearch.s3-website.ap-south-1.amazonaws.com",  
-    "http://localhost:3000",
-    "http://127.0.0.1:3000"
-]
-
-
-
-
+# Allow all origins for now
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],   
@@ -24,14 +13,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class QueryRequest(BaseModel):
-    query: str
-
 @app.post("/")
-def query_endpoint(request: QueryRequest):
+async def query_endpoint(request: Request):
     try:
-        print("Received query:", request.query)
-        result = RAG({"query": request.query})  # wrap into dict for your RAG
+        # Get raw JSON
+        data = await request.json()
+        print("Raw JSON received:", data)
+
+        # Check if 'query' key exists
+        if "query" not in data:
+            return {"documents": [], "all_documents": [], "llm_answer": "Missing 'query' in request"}
+
+        # Call RAG with the received data
+        result = RAG({"query": data["query"]})
         return result
     except Exception as e:
         return {"documents": [], "all_documents": [], "llm_answer": str(e)}
