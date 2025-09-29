@@ -104,7 +104,7 @@ def retrive(state: Agentstate, top_k=3):
     - Keep it very short (3-6 words)
     - Use keywords only
     - Suitable for search engine input
-
+    - Give atleast 5 lines of paragraph
     Context: {context}
     Query: {query}
     Search query:
