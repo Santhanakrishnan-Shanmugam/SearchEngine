@@ -4,28 +4,26 @@ from chain import RAG
 
 app = FastAPI()
 
+# Allow only your React app origin
 origins = [
-    "http://neurasearch.s3-website.ap-south-1.amazonaws.com",  # HTTP version
+    "http://neurasearch.s3-website.ap-south-1.amazonaws.com"
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,       # exact origin
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],      # POST, GET, OPTIONS, etc.
+    allow_headers=["*"]       # Content-Type, Authorization
 )
 
 @app.post("/api/")
 async def query_endpoint(request: Request):
-    try:
-        data = await request.json()
-        if "query" not in data:
-            return {"documents": [], "all_documents": [], "llm_answer": "Missing 'query' in request"}
-        result = RAG({"query": data["query"]})
-        return result
-    except Exception as e:
-        return {"documents": [], "all_documents": [], "llm_answer": str(e)}
+    data = await request.json()
+    if "query" not in data:
+        return {"documents": [], "all_documents": [], "llm_answer": "Missing 'query' in request"}
+    result = RAG({"query": data["query"]})
+    return result
 
 if __name__ == "__main__":
     import uvicorn
