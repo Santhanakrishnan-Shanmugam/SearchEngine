@@ -1,4 +1,3 @@
-# main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -8,15 +7,19 @@ import uvicorn
 
 app = FastAPI()
 
-# CORS for testing; change to specific origins in production
+# Allow frontend
+origins = [
+    "http://localhost:3000",
+    "https://searchengine-lqza.onrender.com"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,   # 👈 not "*"
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 class QueryRequest(BaseModel):
     query: str
@@ -27,5 +30,5 @@ async def search(request: QueryRequest):
     return result
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))  # Use Render's PORT
+    port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
