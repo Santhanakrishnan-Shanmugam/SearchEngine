@@ -23,20 +23,12 @@ app.add_middleware(
 
 class QueryRequest(BaseModel):
     query: str
-@app.get("/")
-async def root():
-    return {"status": "server running"}
 
-@app.post("/")
-async def search(request: QueryRequest):
-    return {"query": request.query, "status": "ok"}
-
-'''
 @app.post("/")
 async def search(request: QueryRequest):
     result = RAG({"query": request.query})
     return result
-'''
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
