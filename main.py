@@ -17,6 +17,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def root():
+    return {"status": "Backend is live"}
+
 class QueryRequest(BaseModel):
     query: str
 
