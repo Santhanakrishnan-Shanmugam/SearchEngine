@@ -23,6 +23,9 @@ app.add_middleware(
 
 class QueryRequest(BaseModel):
     query: str
+@app.get("/")
+async def root():
+    return {"status": "server running"}
 
 @app.post("/")
 async def search(request: QueryRequest):
