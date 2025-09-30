@@ -24,7 +24,7 @@ async def root():
 class QueryRequest(BaseModel):
     query: str
 
-@app.post("/search")
+@app.post("/")
 async def search(request: QueryRequest):
     result = RAG({"query": request.query})
     return result
