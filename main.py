@@ -6,9 +6,10 @@ from chain import RAG
 app = FastAPI()
 
 origins = [
-    "https://your-frontend.vercel.app",
-    "http://localhost:3000",
-]
+    "https://neura-search7.onrender.com",  
+    "http://localhost:3000"
+]                  
+
 
 app.add_middleware(
     CORSMiddleware,
