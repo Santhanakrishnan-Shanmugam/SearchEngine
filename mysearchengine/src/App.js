@@ -15,7 +15,7 @@ function App() {
       const response = await fetch("https://searchengine-10.onrender.com/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: searchQuery }), // ✅ matches FastAPI
+        body: JSON.stringify({ query: searchQuery }), 
       });
 
       if (!response.ok) {

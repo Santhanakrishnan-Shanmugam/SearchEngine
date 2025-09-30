@@ -6,7 +6,7 @@ import os
 
 app = FastAPI()
 
-# ✅ Allow frontend + all (*) during debugging
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://neura-search7.onrender.com", "*"],
@@ -25,6 +25,6 @@ async def search(request: QueryRequest):
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))  # ✅ Use Render-assigned port
+    port = int(os.environ.get("PORT", 8000)) 
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=port)
