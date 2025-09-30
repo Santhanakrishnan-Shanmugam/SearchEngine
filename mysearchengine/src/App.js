@@ -12,7 +12,7 @@ function App() {
 
   const handleSearch = async (searchQuery) => {
     try {
-      const response = await fetch("https://searchengine-10.onrender.com/search", {
+      const response = await fetch("http:3.110.124.2:8000/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: searchQuery }), 
