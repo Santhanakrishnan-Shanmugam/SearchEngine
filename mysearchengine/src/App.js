@@ -20,7 +20,7 @@ function App() {
     setLlmAnswer("");
 
     try {
-      const res = await fetch("https://searchengine-lqza.onrender.com/query", {
+      const res = await fetch("http://3.110.124.2:8080/", { // update to your server & port
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: searchQuery }),
@@ -28,37 +28,15 @@ function App() {
 
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data = await res.json();
-      const jobId = data.job_id;
 
-      // Poll backend for result
-      const pollResult = async () => {
-        try {
-          const resultRes = await fetch(
-            `https://searchengine-lqza.onrender.com/result/${jobId}`
-          );
-          const resultData = await resultRes.json();
-
-          if (resultData.status === "completed") {
-            setTopResults(resultData.result.documents || []);
-            setAllResults(resultData.result.all_documents || []);
-            setLlmAnswer(resultData.result.llm_answer || "");
-            setLoading(false);
-          } else if (resultData.status === "failed") {
-            setErrorMsg("Job failed: " + resultData.error);
-            setLoading(false);
-          } else {
-            setTimeout(pollResult, 3000);
-          }
-        } catch (err) {
-          setErrorMsg("Error fetching results. Check backend logs.");
-          setLoading(false);
-        }
-      };
-
-      pollResult();
+      setTopResults(data.documents || []);
+      setAllResults(data.all_documents || []);
+      setLlmAnswer(data.llm_answer || "");
+      setLoading(false);
     } catch (err) {
       setErrorMsg("Failed to submit query. Check backend logs.");
       setLoading(false);
+      console.error(err);
     }
   };
 
