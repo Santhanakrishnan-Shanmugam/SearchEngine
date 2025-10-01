@@ -4,10 +4,10 @@ import Results from "./components/Results";
 import Logo from "./components/Logo";
 
 function App() {
+  const [query, setQuery] = useState("");
+  const [llmAnswer, setLlmAnswer] = useState("");
   const [topResults, setTopResults] = useState([]);
   const [allResults, setAllResults] = useState([]);
-  const [llmAnswer, setLlmAnswer] = useState("");
-  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -20,7 +20,6 @@ function App() {
     setLlmAnswer("");
 
     try {
-      // Step 1: Submit query to backend
       const res = await fetch("https://searchengine-lqza.onrender.com/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -30,9 +29,8 @@ function App() {
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data = await res.json();
       const jobId = data.job_id;
-      console.log("Job submitted, ID:", jobId);
 
-      // Step 2: Poll backend for result
+      // Poll backend for result
       const pollResult = async () => {
         try {
           const resultRes = await fetch(
@@ -49,11 +47,9 @@ function App() {
             setErrorMsg("Job failed: " + resultData.error);
             setLoading(false);
           } else {
-            // Still running, poll again in 2-3 seconds
             setTimeout(pollResult, 3000);
           }
         } catch (err) {
-          console.error("Error polling job:", err);
           setErrorMsg("Error fetching results. Check backend logs.");
           setLoading(false);
         }
@@ -61,53 +57,45 @@ function App() {
 
       pollResult();
     } catch (err) {
-      console.error("Error submitting query:", err);
       setErrorMsg("Failed to submit query. Check backend logs.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start px-4 py-10 bg-gray-50">
-      {/* Logo */}
-      <div className="mb-6">
-        <Logo />
-      </div>
-
-      {/* Search bar */}
-      <div className="w-full max-w-xl mb-6">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-4">
+      <Logo />
+      <div className="w-full max-w-2xl mt-6">
         <SearchBar onSearch={handleSearch} />
       </div>
 
-      {/* Query display */}
       {query && (
-        <div className="mt-2 text-center text-gray-600">
+        <div className="mt-4 text-center text-gray-600">
           Showing results for: <b>{query}</b>
         </div>
       )}
 
-      {/* Loading */}
       {loading && (
         <div className="mt-4 text-center text-blue-600 font-semibold">
           Loading results...
         </div>
       )}
 
-      {/* Error */}
       {errorMsg && !loading && (
         <div className="mt-4 text-center text-red-600 font-semibold">
           {errorMsg}
         </div>
       )}
 
-      {/* LLM Answer */}
       {llmAnswer && !loading && !errorMsg && (
-        <div className="mt-4 text-center text-lg italic">{llmAnswer}</div>
+        <div className="mt-6 w-full max-w-2xl bg-white p-4 rounded-lg shadow-md">
+          <h2 className="text-lg font-semibold mb-2">LLM Answer:</h2>
+          <p className="italic text-gray-700">{llmAnswer}</p>
+        </div>
       )}
 
-      {/* Results */}
-      {!loading && !errorMsg && (topResults.length > 0 || allResults.length > 0) && (
-        <div className="mt-6 w-full max-w-3xl">
+      {!loading && !errorMsg && topResults.length > 0 && (
+        <div className="mt-6 w-full max-w-2xl">
           <Results results={topResults} title="Top 3 Results" />
           <Results results={allResults} title="All Results" />
         </div>

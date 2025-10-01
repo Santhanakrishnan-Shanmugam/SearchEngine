@@ -11,16 +11,16 @@ from langchain.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 import os
 
-os.environ["GOOGLE_API_KEY"] = "AIzaSyAvfPE6ggTkfRc1zCtZsGqpSpS_PDwSY2k"
+os.environ["GOOGLE_API_KEY"] = "YOUR_GOOGLE_API_KEY"
 
 class Agentstate(TypedDict):
     query: str
-    results: List[Dict[str, str]]        # All crawled docs (max 10)
+    results: List[Dict[str, str]]        
     db: object
-    top_k_results: List[Dict[str, str]] # Top 3 similarity results
+    top_k_results: List[Dict[str, str]] 
     llm_answer: str
 
-# ---- Transformer embedding using PyTorch ----
+# Transformer embeddings
 class TransformerEmbedding:
     def __init__(self, model_name="sentence-transformers/all-MiniLM-L6-V2"):
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -38,17 +38,20 @@ class TransformerEmbedding:
     def embed_query(self, text: str):
         return self.embed_documents([text])[0]
 
-# ---- Web page scraping ----
+# Scrape first 2 paragraphs
 def page(url: str):
     headers = {"User-Agent": "Mozilla/5.0"}
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text, "html.parser")
-    title = soup.title.string if soup.title else "No Title"
-    para = soup.find_all("p")
-    content = " ".join([p.get_text(strip=True) for p in para[:2]])  # take first 2 paragraphs
-    return {"Title": title, "content": content, "url": url}
+    try:
+        response = requests.get(url, headers=headers, timeout=5)
+        soup = BeautifulSoup(response.text, "html.parser")
+        title = soup.title.string if soup.title else "No Title"
+        para = soup.find_all("p")
+        content = " ".join([p.get_text(strip=True) for p in para[:2]])
+        return {"Title": title, "content": content, "url": url}
+    except:
+        return {"Title": "Error", "content": "", "url": url}
 
-# ---- Wikipedia crawling ----
+# Wikipedia search
 def crawling(state: Agentstate):
     query = state['query']
     encoded_query = quote(query)
@@ -58,7 +61,6 @@ def crawling(state: Agentstate):
     soup = BeautifulSoup(response.text, "html.parser")
 
     results = []
-    # Updated selector for Wikipedia search results
     for atag in soup.select("li.mw-search-result a"):
         url = urljoin("https://en.wikipedia.org/", atag['href'])
         results.append(page(url))
@@ -68,18 +70,16 @@ def crawling(state: Agentstate):
     state['results'] = results
     return state
 
-# ---- Create vector database ----
+# Vector DB
 def vectorDB(state: Agentstate):
-    docs = [
-        Document(page_content=r['content'], metadata={"title": r['Title'], "url": r['url']})
-        for r in state['results']
-    ]
+    docs = [Document(page_content=r['content'], metadata={"title": r['Title'], "url": r['url']})
+            for r in state['results']]
     embedding_model = TransformerEmbedding()
     db = Chroma.from_documents(docs, embedding_model)
     state['db'] = db
     return state
 
-# ---- Retrieve top-k results from vector DB ----
+# Retrieve top-k
 def retrive(state: Agentstate, top_k=3):
     query = state['query']
     db = state['db']
@@ -94,71 +94,50 @@ def retrive(state: Agentstate, top_k=3):
         })
 
     state['top_k_results'] = structured_results
-    context=structured_results
-    
-   
+    context = structured_results
 
+    # LLM to generate answer
     prompt = PromptTemplate.from_template("""
-    You are a search engine query generator. 
-    Paraphrase the user's query using the context, but:
-    - Keep it very short (3-6 words)
-    - Use keywords only
-    - Suitable for search engine input
-    - Give atleast 5 lines of paragraph
+    You are an assistant. Answer user query using context:
     Context: {context}
     Query: {query}
-    Search query:
+    Answer:
     """)
 
-    llm=ChatGoogleGenerativeAI( model="gemini-2.0-flash",  
-    temperature=0.0)
-    chain= prompt|llm
-    #response=chain.invoke({'context':context,'query':query})
-    #state['llm_answer'] = response.content
-    state['llm_answer']="According to wikepedia........"
+    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.0)
+    chain = prompt | llm
+    response = chain.invoke({'context': context, 'query': query})
+    state['llm_answer'] = response.content
     return state
 
-# ---- Final output formatting (JSON-serializable) ----
+# Final output
 def final_output(state: Agentstate):
     return {
         "query": state['query'],
         "llm_answer": state['llm_answer'],
-        "documents": state['top_k_results'],  # top 3
-        "all_documents": state['results']     # all 10
+        "documents": state['top_k_results'],
+        "all_documents": state['results']
     }
 
+# Grammar corrector
 def promptcorrect(state: Agentstate):
     query = state['query']
-
     prompt = PromptTemplate.from_template("""
-    Check the grammar and correctness of the search query.
-    Return the corrected search-engine-friendly query.
-
-    Example: "wha is AI" → "what is AI"
-
+    Correct the query for search engines.
     Query: {query}
-    Corrected Search Query:
+    Corrected Query:
     """)
-
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
-        temperature=0.0
-    )
+    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.0)
     chain = prompt | llm
     response = chain.invoke({'query': query})
-
-    # Keep alphanumeric and spaces only
-    query = ''.join([i if i.isalnum() or i.isspace() else '' for i in response.content]).strip()
-
+    query = ''.join([c if c.isalnum() or c.isspace() else '' for c in response.content]).strip()
     state['query'] = query
     return state
 
-        
-
-# ---- Build LangGraph ----
+# Build LangGraph
 def build_rag_graph():
     graph = StateGraph(Agentstate)
-    graph.add_node('prompt_correct',promptcorrect)
+    graph.add_node('prompt_correct', promptcorrect)
     graph.add_node("crawling", crawling)
     graph.add_node("vectorDB", vectorDB)
     graph.add_node("retrive", retrive)
@@ -173,11 +152,10 @@ def build_rag_graph():
 
     return graph.compile()
 
-# ---- Main RAG pipeline ----
+# Main RAG pipeline
 def RAG(inputs: Dict[str, str]):
-    query = inputs['query']
     state: Agentstate = {
-        "query": query,
+        "query": inputs['query'],
         "results": [],
         "db": None,
         "top_k_results": [],

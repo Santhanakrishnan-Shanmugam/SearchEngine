@@ -1,35 +1,32 @@
 import React, { useState } from "react";
 
-const SearchBar = ({ onSearch }) => {
-  const [query, setQuery] = useState("");
+function SearchBar({ onSearch }) {
+  const [input, setInput] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (query.trim()) {
-      onSearch(query);
+    if (input.trim() !== "") {
+      onSearch(input);
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex justify-center mt-6 space-x-2"
-    >
+    <form onSubmit={handleSubmit} className="flex items-center">
       <input
         type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search..."
-        className="w-1/2 p-2 border rounded shadow"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Type your query..."
+        className="flex-grow p-3 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
       <button
         type="submit"
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        className="bg-blue-500 text-white px-4 py-3 rounded-r-md hover:bg-blue-600"
       >
         Search
       </button>
     </form>
   );
-};
+}
 
 export default SearchBar;
