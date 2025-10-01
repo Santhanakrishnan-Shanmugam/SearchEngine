@@ -35,7 +35,7 @@ async def async_rag_call(query: str):
 async def search(request: QueryRequest):
     try:
 
-        result = await asyncio.wait_for(async_rag_call(request.query), timeout=37)
+        result = await asyncio.wait_for(async_rag_call(request.query), timeout=100)
         return {"query": request.query, "result": result}
     except asyncio.TimeoutError:
         return {"query": request.query, "error": "RAG request timed out"}
