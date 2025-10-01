@@ -113,8 +113,9 @@ def retrive(state: Agentstate, top_k=3):
     llm=ChatGoogleGenerativeAI( model="gemini-2.0-flash",  
     temperature=0.0)
     chain= prompt|llm
-    response=chain.invoke({'context':context,'query':query})
-    state['llm_answer'] = response.content
+    #response=chain.invoke({'context':context,'query':query})
+    #state['llm_answer'] = response.content
+    state['llm_answer']="According to wikepedia........"
     return state
 
 # ---- Final output formatting (JSON-serializable) ----

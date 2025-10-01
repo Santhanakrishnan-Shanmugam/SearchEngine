@@ -68,37 +68,49 @@ function App() {
   };
 
   return (
-    <div className="app-container px-4 py-6">
-      <Logo />
-      <SearchBar onSearch={handleSearch} />
+    <div className="min-h-screen flex flex-col items-center justify-start px-4 py-10 bg-gray-50">
+      {/* Logo */}
+      <div className="mb-6">
+        <Logo />
+      </div>
 
+      {/* Search bar */}
+      <div className="w-full max-w-xl mb-6">
+        <SearchBar onSearch={handleSearch} />
+      </div>
+
+      {/* Query display */}
       {query && (
-        <div className="mt-4 text-center text-gray-600">
+        <div className="mt-2 text-center text-gray-600">
           Showing results for: <b>{query}</b>
         </div>
       )}
 
+      {/* Loading */}
       {loading && (
         <div className="mt-4 text-center text-blue-600 font-semibold">
           Loading results...
         </div>
       )}
 
+      {/* Error */}
       {errorMsg && !loading && (
         <div className="mt-4 text-center text-red-600 font-semibold">
           {errorMsg}
         </div>
       )}
 
+      {/* LLM Answer */}
       {llmAnswer && !loading && !errorMsg && (
         <div className="mt-4 text-center text-lg italic">{llmAnswer}</div>
       )}
 
-      {!loading && !errorMsg && (
-        <>
+      {/* Results */}
+      {!loading && !errorMsg && (topResults.length > 0 || allResults.length > 0) && (
+        <div className="mt-6 w-full max-w-3xl">
           <Results results={topResults} title="Top 3 Results" />
           <Results results={allResults} title="All Results" />
-        </>
+        </div>
       )}
     </div>
   );
