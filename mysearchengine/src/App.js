@@ -20,7 +20,7 @@ function App() {
     setLlmAnswer("");
 
     try {
-      const res = await fetch("http://3.110.124.2:8080/", { // update to your server & port
+      const res = await fetch("http://3.110.124.2/", { // update to your server & port
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: searchQuery }),
