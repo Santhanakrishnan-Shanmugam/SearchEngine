@@ -8,22 +8,19 @@ function App() {
   const [allResults, setAllResults] = useState([]);
   const [llmAnswer, setLlmAnswer] = useState("");
   const [query, setQuery] = useState("");
-  const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Function to handle search
   const handleSearch = async (searchQuery) => {
-    try {
-      setLoading(true);
-      setHasSearched(true);
-      setQuery(searchQuery);
-      setErrorMsg("");
-      setLlmAnswer("");
-      setTopResults([]);
-      setAllResults([]);
+    setQuery(searchQuery);
+    setLoading(true);
+    setErrorMsg("");
+    setTopResults([]);
+    setAllResults([]);
+    setLlmAnswer("");
 
-      // Step 1: Send query to backend
+    try {
+      // Step 1: Submit query to backend
       const res = await fetch("https://searchengine-lqza.onrender.com/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -31,12 +28,11 @@ function App() {
       });
 
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-
       const data = await res.json();
       const jobId = data.job_id;
-      console.log("✅ Job submitted, ID:", jobId);
+      console.log("Job submitted, ID:", jobId);
 
-      // Step 2: Poll result
+      // Step 2: Poll backend for result
       const pollResult = async () => {
         try {
           const resultRes = await fetch(
@@ -45,30 +41,28 @@ function App() {
           const resultData = await resultRes.json();
 
           if (resultData.status === "completed") {
-            console.log("✅ Job completed:", resultData);
-
             setTopResults(resultData.result.documents || []);
             setAllResults(resultData.result.all_documents || []);
             setLlmAnswer(resultData.result.llm_answer || "");
             setLoading(false);
           } else if (resultData.status === "failed") {
-            setErrorMsg("❌ Job failed: " + resultData.error);
+            setErrorMsg("Job failed: " + resultData.error);
             setLoading(false);
           } else {
-            // still running → poll again in 2s
-            setTimeout(pollResult, 2000);
+            // Still running, poll again in 2-3 seconds
+            setTimeout(pollResult, 3000);
           }
-        } catch (error) {
-          console.error("Error polling job:", error);
-          setErrorMsg("❌ Error polling job. Check backend logs.");
+        } catch (err) {
+          console.error("Error polling job:", err);
+          setErrorMsg("Error fetching results. Check backend logs.");
           setLoading(false);
         }
       };
 
       pollResult();
-    } catch (error) {
-      console.error("Error submitting query:", error);
-      setErrorMsg("❌ Something went wrong. Check backend logs.");
+    } catch (err) {
+      console.error("Error submitting query:", err);
+      setErrorMsg("Failed to submit query. Check backend logs.");
       setLoading(false);
     }
   };
@@ -76,40 +70,31 @@ function App() {
   return (
     <div className="app-container px-4 py-6">
       <Logo />
-
-      {/* Search bar */}
       <SearchBar onSearch={handleSearch} />
 
-      {/* Show query */}
       {query && (
         <div className="mt-4 text-center text-gray-600">
           Showing results for: <b>{query}</b>
         </div>
       )}
 
-      {/* Loading */}
       {loading && (
         <div className="mt-4 text-center text-blue-600 font-semibold">
           Loading results...
         </div>
       )}
 
-      {/* Error */}
       {errorMsg && !loading && (
         <div className="mt-4 text-center text-red-600 font-semibold">
           {errorMsg}
         </div>
       )}
 
-      {/* LLM Answer */}
       {llmAnswer && !loading && !errorMsg && (
-        <div className="mt-4 text-center text-lg italic">
-          {llmAnswer}
-        </div>
+        <div className="mt-4 text-center text-lg italic">{llmAnswer}</div>
       )}
 
-      {/* Results */}
-      {hasSearched && !loading && !errorMsg && (
+      {!loading && !errorMsg && (
         <>
           <Results results={topResults} title="Top 3 Results" />
           <Results results={allResults} title="All Results" />
