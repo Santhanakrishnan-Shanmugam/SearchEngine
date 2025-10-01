@@ -11,7 +11,7 @@ from langchain.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 import os
 
-os.environ["GOOGLE_API_KEY"] = "YOUR_GOOGLE_API_KEY"
+os.environ["GOOGLE_API_KEY"] = "AIzaSyAvfPE6ggTkfRc1zCtZsGqpSpS_PDwSY2k"
 
 class Agentstate(TypedDict):
     query: str
