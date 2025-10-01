@@ -12,15 +12,18 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Function to handle search submission
+  // Function to handle search
   const handleSearch = async (searchQuery) => {
     try {
       setLoading(true);
       setHasSearched(true);
       setQuery(searchQuery);
       setErrorMsg("");
+      setLlmAnswer("");
+      setTopResults([]);
+      setAllResults([]);
 
-      // Step 1: Submit query to backend
+      // Step 1: Send query to backend
       const res = await fetch("https://searchengine-lqza.onrender.com/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -31,9 +34,9 @@ function App() {
 
       const data = await res.json();
       const jobId = data.job_id;
-      console.log("Job submitted, ID:", jobId);
+      console.log("✅ Job submitted, ID:", jobId);
 
-      // Step 2: Poll backend for job result
+      // Step 2: Poll result
       const pollResult = async () => {
         try {
           const resultRes = await fetch(
@@ -42,22 +45,22 @@ function App() {
           const resultData = await resultRes.json();
 
           if (resultData.status === "completed") {
-            // Update UI with results
+            console.log("✅ Job completed:", resultData);
+
             setTopResults(resultData.result.documents || []);
             setAllResults(resultData.result.all_documents || []);
             setLlmAnswer(resultData.result.llm_answer || "");
             setLoading(false);
           } else if (resultData.status === "failed") {
-            // Show error if job failed
-            setErrorMsg("Job failed: " + resultData.error);
+            setErrorMsg("❌ Job failed: " + resultData.error);
             setLoading(false);
           } else {
-            // Job still running, poll again in 3 seconds
-            setTimeout(pollResult, 3000);
+            // still running → poll again in 2s
+            setTimeout(pollResult, 2000);
           }
         } catch (error) {
           console.error("Error polling job:", error);
-          setErrorMsg("Error polling job. Check backend logs.");
+          setErrorMsg("❌ Error polling job. Check backend logs.");
           setLoading(false);
         }
       };
@@ -65,7 +68,7 @@ function App() {
       pollResult();
     } catch (error) {
       console.error("Error submitting query:", error);
-      setErrorMsg("Something went wrong. Check backend logs.");
+      setErrorMsg("❌ Something went wrong. Check backend logs.");
       setLoading(false);
     }
   };
@@ -74,33 +77,35 @@ function App() {
     <div className="app-container px-4 py-6">
       <Logo />
 
-      {/* Search bar component */}
+      {/* Search bar */}
       <SearchBar onSearch={handleSearch} />
 
-      {/* Query display */}
+      {/* Show query */}
       {query && (
         <div className="mt-4 text-center text-gray-600">
           Showing results for: <b>{query}</b>
         </div>
       )}
 
-      {/* Loading indicator */}
+      {/* Loading */}
       {loading && (
         <div className="mt-4 text-center text-blue-600 font-semibold">
           Loading results...
         </div>
       )}
 
-      {/* Error message */}
+      {/* Error */}
       {errorMsg && !loading && (
         <div className="mt-4 text-center text-red-600 font-semibold">
           {errorMsg}
         </div>
       )}
 
-      {/* LLM answer */}
+      {/* LLM Answer */}
       {llmAnswer && !loading && !errorMsg && (
-        <div className="mt-4 text-center text-lg italic">{llmAnswer}</div>
+        <div className="mt-4 text-center text-lg italic">
+          {llmAnswer}
+        </div>
       )}
 
       {/* Results */}
