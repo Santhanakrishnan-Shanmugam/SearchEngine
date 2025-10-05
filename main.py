@@ -5,18 +5,9 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-
-origins = [
-    "http://localhost:3000",
-    "http://neurasearch.s3-website.ap-south-1.amazonaws.com",
-    "https://neura-search7.onrender.com"
-]
-
-
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,   
+    allow_origins=['*'],   
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],                   
@@ -29,7 +20,7 @@ class QueryRequest(BaseModel):
 def query_endpoint(request: QueryRequest):
     try:
         print("Received query:", request.query)
-        result = RAG({"query": request.query})  # wrap into dict for your RAG
+        result = RAG({"query": request.query})  
         return result
     except Exception as e:
         return {"documents": [], "all_documents": [], "llm_answer": str(e)}

@@ -20,7 +20,8 @@ function App() {
     setLlmAnswer("");
 
     try {
-      const res = await fetch("http://3.110.124.2/", { // update to your server & port
+      axios.post("http://127.0.0.1:8000/",{query:searchQuery});
+      const res = await fetch("http://127.0.0.1:8000/", { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: searchQuery }),
